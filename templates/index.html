@@ -1051,7 +1051,9 @@
         const pk = await window.nostr.getPublicKey();
         console.log('Received public key:', pk);
 
-        if (pk && typeof pk === 'string' && pk.length === 64) {
+        const hexRegex = /^[0-9a-fA-F]{64}$/;
+
+        if (pk && typeof pk === 'string' && hexRegex.test(pk)) {
           pubkey = pk;
           console.log('Login successful, pubkey set');
           await onLoginSuccess();
@@ -1061,12 +1063,12 @@
         }
       } catch (err) {
         console.error('Extension login error:', err);
-        if (err.name === 'SyntaxError') {
-          showToast('拡張機能との通信エラー');
-        } else if (err.message && err.message.includes('Rejected')) {
+        if (err instanceof DOMException && err.name === 'SyntaxError') {
+          showToast('拡張機能との通信でエラーが発生しました。');
+        } else if (err.message && err.message.toLowerCase().includes('rejected')) {
           showToast('ログインがキャンセルされました');
         } else {
-          showToast('ログインに失敗しました: ' + (err.message || err));
+          showToast(`ログインに失敗しました: ${err.message || '不明なエラー'}`);
         }
       }
     }
