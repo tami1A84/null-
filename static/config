@@ -1,0 +1,12 @@
+[core]
+	repositoryformatversion = 0
+	filemode = false
+	bare = false
+	logallrefupdates = true
+	symlinks = false
+[user]
+	email = tami1A84@example.com
+	name = tami1A84
+[remote "origin"]
+	url = https://github.com/tami1A84/null-.git
+	fetch = +refs/heads/*:refs/remotes/origin/*

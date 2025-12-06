@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Nostr Line</title>
+    <link rel="stylesheet" href="/static/css/style.css">
+</head>
+<body>
+    <div class="app-container">
+        <!-- ヘッダー -->
+        <header class="app-header">
+            <h1 id="header-title">ホーム</h1>
+        </header>
+
+        <!-- メインコンテンツエリア -->
+        <main class="app-main" id="main-content">
+            <!-- 各タブのコンテンツがここに表示される -->
+        </main>
+
+        <!-- 下部固定タブ -->
+        <nav class="bottom-nav">
+            <button class="nav-item active" data-tab="home">
+                <span class="nav-icon">🏠</span>
+                <span class="nav-label">ホーム</span>
+            </button>
+            <button class="nav-item" data-tab="chat">
+                <span class="nav-icon">💬</span>
+                <span class="nav-label">トーク</span>
+            </button>
+            <button class="nav-item" data-tab="timeline">
+                <span class="nav-icon">📰</span>
+                <span class="nav-label">タイムライン</span>
+            </button>
+            <button class="nav-item" data-tab="wallet">
+                <span class="nav-icon">👛</span>
+                <span class="nav-label">おさいふ</span>
+            </button>
+        </nav>
+    </div>
+
+    <!-- Templates for each tab -->
+    <template id="home-template">
+        <div class="profile-section">
+            <div class="profile-header">
+                <div class="profile-avatar" id="profile-avatar">👤</div>
+                <div class="profile-info">
+                    <h2 id="profile-name">ユーザー名</h2>
+                    <p id="profile-npub">npub...</p>
+                </div>
+                <button class="edit-profile-btn" id="edit-profile">編集</button>
+            </div>
+            <div class="profile-bio" id="profile-bio"></div>
+        </div>
+        <div class="posts-section">
+            <h3>投稿</h3>
+            <div id="user-posts"></div>
+        </div>
+    </template>
+
+    <template id="chat-template">
+        <div class="chat-list" id="chat-list">
+            <p class="empty-state">DM履歴がありません</p>
+        </div>
+    </template>
+
+    <template id="timeline-template">
+        <div class="timeline-header">
+            <h3>yabu.me タイムライン</h3>
+            <button id="refresh-timeline">🔄</button>
+        </div>
+        <div class="timeline-feed" id="timeline-feed">
+            <p class="loading">読み込み中...</p>
+        </div>
+    </template>
+
+    <template id="wallet-template">
+        <div class="wallet-section">
+            <div class="wallet-balance">
+                <h3>残高</h3>
+                <p class="balance" id="wallet-balance">0 sats</p>
+            </div>
+            <div class="nwc-settings">
+                <h3>NWC設定</h3>
+                <input type="text" id="nwc-url" placeholder="nostr+walletconnect://...">
+                <button id="connect-nwc">接続</button>
+            </div>
+        </div>
+    </template>
+
+    <template id="post-item">
+        <div class="post-item">
+            <div class="post-header">
+                <div class="post-avatar">👤</div>
+                <div class="post-author">
+                    <span class="author-name"></span>
+                    <span class="post-time"></span>
+                </div>
+            </div>
+            <div class="post-content"></div>
+            <div class="post-actions">
+                <button class="action-btn like-btn">👍 <span class="count">0</span></button>
+                <button class="action-btn repost-btn">🔁 <span class="count">0</span></button>
+                <button class="action-btn zap-btn">⚡ <span class="count">0</span></button>
+            </div>
+        </div>
+    </template>
+
+    <script src="/static/js/nostr.js"></script>
+    <script src="/static/js/app.js"></script>
+</body>
+</html>

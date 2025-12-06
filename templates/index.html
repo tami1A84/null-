@@ -1,0 +1,154 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>null² - Nostr Web Client</title>
+    <link rel="stylesheet" href="/static/css/style.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Line+Seed+Sans+JP:wght@400;700&display=swap" rel="stylesheet">
+    
+    <!-- nostr-login -->
+    <script 
+        src="https://www.unpkg.com/nostr-login@latest/dist/unpkg.js"
+        data-perms="sign_event:1,sign_event:0"
+        data-theme="default"
+        data-methods="connect,extension,local"
+    ></script>
+</head>
+<body>
+    <div class="app-container">
+        <!-- ヘッダー -->
+        <header class="app-header">
+            <h1 id="header-title">ホーム</h1>
+            <div class="header-actions">
+                <button id="login-btn" class="header-btn">ログイン</button>
+                <button id="logout-btn" class="header-btn" style="display: none;">ログアウト</button>
+            </div>
+        </header>
+
+        <!-- メインコンテンツエリア -->
+        <main class="main-content">
+            <!-- ホームタブ -->
+            <div id="tab-home" class="tab-content active">
+                <div class="profile-section">
+                    <div class="profile-header">
+                        <img id="profile-avatar" src="/static/img/default-avatar.svg" alt="Avatar" class="profile-avatar">
+                        <div class="profile-info">
+                            <h2 id="profile-name">読み込み中...</h2>
+                            <p id="profile-npub" class="profile-npub"></p>
+                        </div>
+                        <button id="edit-profile-btn" class="icon-btn">編集</button>
+                    </div>
+                    <div class="profile-bio">
+                        <p id="profile-about"></p>
+                    </div>
+                </div>
+
+                <div class="posts-section">
+                    <h3>自分の投稿</h3>
+                    <div id="my-posts" class="posts-list"></div>
+                </div>
+            </div>
+
+            <!-- トークタブ (NIP-17 DM) -->
+            <div id="tab-talk" class="tab-content">
+                <div class="dm-list">
+                    <div class="empty-state">
+                        <p>DMはまだありません</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- タイムラインタブ -->
+            <div id="tab-timeline" class="tab-content">
+                <div class="post-form">
+                    <textarea id="post-input" placeholder="今何してる？（エアリプ専用）" maxlength="280"></textarea>
+                    <button id="post-btn" class="primary-btn">投稿</button>
+                </div>
+                
+                <div id="timeline" class="posts-list"></div>
+            </div>
+
+            <!-- おさいふタブ (NWC) -->
+            <div id="tab-wallet" class="tab-content">
+                <div class="wallet-section">
+                    <div class="wallet-balance">
+                        <h3>残高</h3>
+                        <p class="balance-amount">--- sats</p>
+                    </div>
+                    <div class="wallet-actions">
+                        <button class="wallet-btn">送金</button>
+                        <button class="wallet-btn">受取</button>
+                    </div>
+                    <div class="nwc-status">
+                        <p>NWC: <span id="nwc-status">未接続</span></p>
+                    </div>
+                </div>
+            </div>
+        </main>
+
+        <!-- 投稿詳細モーダル -->
+        <div id="post-modal" class="modal">
+            <div class="modal-content">
+                <span class="close">&times;</span>
+                <div id="modal-post-content"></div>
+            </div>
+        </div>
+
+        <!-- プロフィール編集モーダル -->
+        <div id="edit-profile-modal" class="modal">
+            <div class="modal-content">
+                <span class="close">&times;</span>
+                <h2>プロフィール編集</h2>
+                <form id="edit-profile-form">
+                    <label>名前</label>
+                    <input type="text" id="edit-name" placeholder="名前">
+                    
+                    <label>自己紹介</label>
+                    <textarea id="edit-about" placeholder="自己紹介"></textarea>
+                    
+                    <label>アイコンURL</label>
+                    <input type="text" id="edit-picture" placeholder="https://...">
+                    
+                    <button type="submit" class="primary-btn">保存</button>
+                </form>
+            </div>
+        </div>
+
+        <!-- 下部タブバー -->
+        <nav class="tab-bar">
+            <button class="tab-btn active" data-tab="home">
+                <svg class="tab-icon" viewBox="0 0 24 24" fill="currentColor">
+                    <path d="M10 20v-6h4v6h5v-8h3L12 3 2 12h3v8z"/>
+                </svg>
+                <span>ホーム</span>
+            </button>
+            
+            <button class="tab-btn" data-tab="talk">
+                <svg class="tab-icon" viewBox="0 0 24 24" fill="currentColor">
+                    <path d="M20 2H4c-1.1 0-2 .9-2 2v18l4-4h14c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2z"/>
+                </svg>
+                <span>トーク</span>
+            </button>
+            
+            <button class="tab-btn" data-tab="timeline">
+                <svg class="tab-icon" viewBox="0 0 24 24" fill="currentColor">
+                    <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/>
+                </svg>
+                <span>タイムライン</span>
+            </button>
+            
+            <button class="tab-btn" data-tab="wallet">
+                <svg class="tab-icon" viewBox="0 0 24 24" fill="currentColor">
+                    <path d="M21 18v1c0 1.1-.9 2-2 2H5c-1.11 0-2-.9-2-2V5c0-1.1.89-2 2-2h14c1.1 0 2 .9 2 2v1h-9c-1.11 0-2 .9-2 2v8c0 1.1.89 2 2 2h9zm-9-2h10V8H12v8zm4-2.5c-.83 0-1.5-.67-1.5-1.5s.67-1.5 1.5-1.5 1.5.67 1.5 1.5-.67 1.5-1.5 1.5z"/>
+                </svg>
+                <span>おさいふ</span>
+            </button>
+        </nav>
+    </div>
+
+    <script src="/static/js/app.js"></script>
+</body>
+</html>

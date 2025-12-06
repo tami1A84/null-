@@ -1,0 +1,110 @@
+null-web/
+│
+├── cmd/
+│   └── main.go                    # メインアプリケーション（Webサーバー）
+│
+├── static/                        # 静的ファイル
+│   ├── css/
+│   │   └── style.css             # LINE風スタイルシート
+│   ├── js/
+│   │   └── app.js                # フロントエンドJavaScript
+│   └── img/
+│       └── default-avatar.svg    # デフォルトアバター画像
+│
+├── templates/
+│   └── index.html                # メインHTMLテンプレート
+│
+├── .gitignore                    # Git無視ファイル設定
+├── ARCHITECTURE.md               # アーキテクチャドキュメント
+├── LICENSE                       # MITライセンス
+├── Makefile                      # ビルド・実行用Makefile
+├── QUICKSTART.md                 # クイックスタートガイド
+├── README.md                     # プロジェクト説明
+├── SETUP.md                      # セットアップガイド
+├── TODO.md                       # 開発TODOリスト
+├── config.json.example           # 設定ファイルサンプル
+└── go.mod                        # Go modules設定
+
+ファイル数: 15
+ディレクトリ数: 6
+
+主要ファイルの説明:
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+📄 cmd/main.go
+  - Webサーバーのエントリポイント
+  - APIエンドポイントの実装
+  - Nostrリレーとの通信処理
+
+📄 static/css/style.css
+  - LINE風のデザインシステム
+  - レスポンシブレイアウト
+  - アニメーション最小限
+
+📄 static/js/app.js
+  - タブナビゲーション
+  - API通信
+  - WebSocket接続
+  - DOM操作
+
+📄 templates/index.html
+  - シングルページアプリケーション
+  - 4つのタブ（ホーム、トーク、タイムライン、おさいふ）
+  - モーダルダイアログ
+
+📄 README.md
+  - プロジェクト概要
+  - 特徴と機能
+  - インストール方法
+  - ライセンス情報
+
+📄 QUICKSTART.md
+  - 5分で始めるガイド
+  - 最小限の手順
+  - トラブルシューティング
+
+📄 ARCHITECTURE.md
+  - システム構成図
+  - データフロー
+  - Nostr実装詳細
+  - セキュリティ考慮事項
+
+📄 TODO.md
+  - 開発ロードマップ
+  - 優先度別タスク
+  - 完了済み項目
+
+設定ファイル:
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+ユーザー設定ファイル（別途作成が必要）:
+~/.config/algia/config.json
+
+内容:
+{
+  "relays": {
+    "wss://yabu.me": {
+      "read": true,
+      "write": true
+    }
+  },
+  "privatekey": "nsec1...",
+  "nwc-uri": "nostr+walletconnect://..."  // オプション
+}
+
+開発環境:
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+必要なもの:
+- Go 1.21以上
+- Nostr秘密鍵（nsec形式）
+- ブラウザ（Chrome, Firefox, Safari等）
+
+推奨開発ツール:
+- VSCode + Go拡張
+- golangci-lint
+- air（ホットリロード用）
+
+ポート:
+- デフォルト: 8080
+- 環境変数PORTで変更可能

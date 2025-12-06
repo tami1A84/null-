@@ -1,0 +1,18 @@
+feat: Add nostr-login and Amber support with yabu.me integration
+
+- Integrate nostr-login for multiple login methods (extension, Nostr Connect, Amber, read-only)
+- Add direct posting to wss://yabu.me relay
+- Implement profile editing with yabu.me submission
+- Add SimpleRelayPool for WebSocket communication
+- Update UI with login/logout buttons
+- Add comprehensive documentation (README, QUICKSTART, IMPLEMENTATION)
+- LINE-style responsive design
+- Support for Android Amber signer
+
+Features:
+- Multiple login methods via nostr-login
+- Post to yabu.me relay (kind 1)
+- Edit profile and send to yabu.me (kind 0)
+- Timeline display with profile pictures
+- Account switching
+- Session management
