@@ -5,15 +5,45 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
   <title>null² - Nostr Client</title>
 
-  <!-- nostr-tools from ESM CDN -->
+  <!-- nostr-tools from CDN -->
   <script type="module">
-    import { SimplePool, nip19, finalizeEvent, getPublicKey } from 'https://esm.sh/nostr-tools@2.7.0';
+    // Try loading from different CDN sources
+    async function loadNostrTools() {
+      try {
+        // Use jsdelivr ESM
+        const poolModule = await import('https://cdn.jsdelivr.net/npm/nostr-tools@2.7.0/+esm');
+        const { SimplePool, nip19 } = poolModule;
 
-    // Expose to global scope
-    window.NostrTools = { SimplePool, nip19, finalizeEvent, getPublicKey };
+        window.NostrTools = { SimplePool, nip19 };
+        console.log('NostrTools loaded from jsdelivr:', Object.keys(window.NostrTools));
 
-    // Dispatch event when ready
-    window.dispatchEvent(new Event('nostr-tools-ready'));
+        window.dispatchEvent(new Event('nostr-tools-ready'));
+      } catch (e) {
+        console.error('Failed to load nostr-tools from jsdelivr:', e);
+
+        // Fallback to esm.sh
+        try {
+          const [poolMod, nip19Mod] = await Promise.all([
+            import('https://esm.sh/nostr-tools@2.7.0/pool'),
+            import('https://esm.sh/nostr-tools@2.7.0/nip19')
+          ]);
+
+          window.NostrTools = {
+            SimplePool: poolMod.SimplePool,
+            nip19: nip19Mod
+          };
+          console.log('NostrTools loaded from esm.sh:', Object.keys(window.NostrTools));
+
+          window.dispatchEvent(new Event('nostr-tools-ready'));
+        } catch (e2) {
+          console.error('Failed to load nostr-tools:', e2);
+          document.getElementById('loadingStatus').textContent = 'ライブラリ読み込みエラー';
+          document.getElementById('loadingStatus').style.color = '#ef4444';
+        }
+      }
+    }
+
+    loadNostrTools();
   </script>
 
   <style>
@@ -1005,7 +1035,7 @@
       }
     });
 
-    function loginWithExtension() {
+    async function loginWithExtension() {
       if (!nostrToolsReady) {
         showToast('ライブラリを読み込み中です');
         return;
@@ -1016,23 +1046,29 @@
         return;
       }
 
-      window.nostr.getPublicKey()
-        .then(pk => {
-          if (pk) {
-            pubkey = pk;
-            onLoginSuccess();
-          } else {
-            showToast('公開鍵を取得できませんでした');
-          }
-        })
-        .catch(err => {
-          console.error('Extension login error:', err);
-          if (err.message && err.message.includes('Rejected')) {
-            showToast('ログインがキャンセルされました');
-          } else {
-            showToast('ログインに失敗しました');
-          }
-        });
+      try {
+        console.log('Requesting public key from extension...');
+        const pk = await window.nostr.getPublicKey();
+        console.log('Received public key:', pk);
+
+        if (pk && typeof pk === 'string' && pk.length === 64) {
+          pubkey = pk;
+          console.log('Login successful, pubkey set');
+          await onLoginSuccess();
+        } else {
+          console.error('Invalid public key format:', pk);
+          showToast('無効な公開鍵形式です');
+        }
+      } catch (err) {
+        console.error('Extension login error:', err);
+        if (err.name === 'SyntaxError') {
+          showToast('拡張機能との通信エラー');
+        } else if (err.message && err.message.includes('Rejected')) {
+          showToast('ログインがキャンセルされました');
+        } else {
+          showToast('ログインに失敗しました: ' + (err.message || err));
+        }
+      }
     }
 
     function loginWithAmber() {
@@ -1117,19 +1153,42 @@
       }
 
       name.textContent = profile.name || profile.display_name || 'Anonymous';
-      npubEl.textContent = pubkey && nip19 ? nip19.npubEncode(pubkey).substring(0, 20) + '...' : '';
+
+      // npub encoding with error handling
+      if (pubkey && nip19) {
+        try {
+          const npub = nip19.npubEncode(pubkey);
+          npubEl.textContent = npub.substring(0, 20) + '...';
+        } catch (e) {
+          console.error('Failed to encode npub:', e);
+          npubEl.textContent = pubkey.substring(0, 16) + '...';
+        }
+      } else {
+        npubEl.textContent = '';
+      }
+
       about.textContent = profile.about || '';
     }
 
     function copyNpub() {
       if (pubkey && nip19) {
-        navigator.clipboard.writeText(nip19.npubEncode(pubkey));
-        showToast('npubをコピーしました');
+        try {
+          const npub = nip19.npubEncode(pubkey);
+          navigator.clipboard.writeText(npub);
+          showToast('npubをコピーしました');
+        } catch (e) {
+          console.error('Failed to encode npub:', e);
+          navigator.clipboard.writeText(pubkey);
+          showToast('公開鍵をコピーしました');
+        }
       }
     }
 
     async function loadTimeline() {
-      if (!pool) return;
+      if (!pool) {
+        console.error('Pool not initialized');
+        return;
+      }
 
       const container = document.getElementById('timeline');
       container.innerHTML = '<div class="loading"><div class="spinner"></div></div>';
@@ -1139,6 +1198,7 @@
           timelineSub.close();
         }
 
+        console.log('Connecting to relay:', RELAY_URL);
         const events = await pool.querySync([RELAY_URL], {
           kinds: [1],
           limit: 50
