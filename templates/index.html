@@ -1,154 +1,1361 @@
 <!DOCTYPE html>
 <html lang="ja">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>null² - Nostr Web Client</title>
-    <link rel="stylesheet" href="/static/css/style.css">
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Line+Seed+Sans+JP:wght@400;700&display=swap" rel="stylesheet">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>algia - Nostr Client</title>
+  
+  <!-- LINE Seed Font -->
+  <style>
+    @font-face {
+      font-family: 'LINE Seed JP';
+      src: url('https://cdn.jsdelivr.net/gh/nicemoon4/LINESeedJP/LINESeedJP_OTF_Rg.woff2') format('woff2');
+      font-weight: 400;
+    }
+    @font-face {
+      font-family: 'LINE Seed JP';
+      src: url('https://cdn.jsdelivr.net/gh/nicemoon4/LINESeedJP/LINESeedJP_OTF_Bd.woff2') format('woff2');
+      font-weight: 700;
+    }
+    @font-face {
+      font-family: 'LINE Seed JP';
+      src: url('https://cdn.jsdelivr.net/gh/nicemoon4/LINESeedJP/LINESeedJP_OTF_Eb.woff2') format('woff2');
+      font-weight: 800;
+    }
+  </style>
+  
+  <style>
+    :root {
+      --line-green: #06C755;
+      --line-green-dark: #05a648;
+      --line-green-light: #e6f9ed;
+      --bg-primary: #ffffff;
+      --bg-secondary: #f7f8fa;
+      --bg-card: #ffffff;
+      --text-primary: #111111;
+      --text-secondary: #6b7280;
+      --text-tertiary: #9ca3af;
+      --border-color: #e5e7eb;
+      --shadow-sm: 0 1px 2px rgba(0,0,0,0.05);
+      --shadow-md: 0 4px 12px rgba(0,0,0,0.08);
+      --shadow-lg: 0 8px 24px rgba(0,0,0,0.12);
+      --radius-sm: 8px;
+      --radius-md: 12px;
+      --radius-lg: 16px;
+      --radius-xl: 24px;
+    }
     
-    <!-- nostr-login -->
-    <script 
-        src="https://www.unpkg.com/nostr-login@latest/dist/unpkg.js"
-        data-perms="sign_event:1,sign_event:0"
-        data-theme="default"
-        data-methods="connect,extension,local"
-    ></script>
+    .dark {
+      --bg-primary: #0a0a0a;
+      --bg-secondary: #141414;
+      --bg-card: #1a1a1a;
+      --text-primary: #ffffff;
+      --text-secondary: #9ca3af;
+      --text-tertiary: #6b7280;
+      --border-color: #2a2a2a;
+      --shadow-sm: 0 1px 2px rgba(0,0,0,0.3);
+      --shadow-md: 0 4px 12px rgba(0,0,0,0.4);
+      --shadow-lg: 0 8px 24px rgba(0,0,0,0.5);
+    }
+    
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+    
+    body {
+      font-family: 'LINE Seed JP', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+      background: var(--bg-secondary);
+      color: var(--text-primary);
+      min-height: 100vh;
+      line-height: 1.6;
+      -webkit-font-smoothing: antialiased;
+    }
+    
+    /* Header */
+    .header {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 60px;
+      background: var(--bg-primary);
+      border-bottom: 1px solid var(--border-color);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 20px;
+      z-index: 100;
+      backdrop-filter: blur(10px);
+    }
+    
+    .logo {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      font-weight: 800;
+      font-size: 22px;
+      color: var(--line-green);
+    }
+    
+    .logo-icon {
+      width: 36px;
+      height: 36px;
+      background: var(--line-green);
+      border-radius: 10px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: white;
+      font-size: 18px;
+      font-weight: 800;
+    }
+    
+    .header-actions {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+    
+    .icon-btn {
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+      border: none;
+      background: var(--bg-secondary);
+      color: var(--text-primary);
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: all 0.2s ease;
+    }
+    
+    .icon-btn:hover {
+      background: var(--line-green-light);
+      color: var(--line-green);
+    }
+    
+    .dark .icon-btn:hover {
+      background: rgba(6, 199, 85, 0.15);
+    }
+    
+    .avatar {
+      width: 36px;
+      height: 36px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, var(--line-green), #00a550);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: white;
+      font-weight: 700;
+      font-size: 14px;
+      cursor: pointer;
+    }
+    
+    /* Main Layout */
+    .main-container {
+      display: flex;
+      min-height: 100vh;
+      padding-top: 60px;
+    }
+    
+    /* Sidebar */
+    .sidebar {
+      width: 280px;
+      position: fixed;
+      left: 0;
+      top: 60px;
+      bottom: 0;
+      background: var(--bg-primary);
+      border-right: 1px solid var(--border-color);
+      padding: 20px 16px;
+      overflow-y: auto;
+    }
+    
+    .nav-section {
+      margin-bottom: 24px;
+    }
+    
+    .nav-title {
+      font-size: 11px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      color: var(--text-tertiary);
+      padding: 0 12px;
+      margin-bottom: 8px;
+    }
+    
+    .nav-item {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 12px;
+      border-radius: var(--radius-md);
+      color: var(--text-secondary);
+      text-decoration: none;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      font-weight: 500;
+    }
+    
+    .nav-item:hover {
+      background: var(--bg-secondary);
+      color: var(--text-primary);
+    }
+    
+    .nav-item.active {
+      background: var(--line-green-light);
+      color: var(--line-green);
+    }
+    
+    .dark .nav-item.active {
+      background: rgba(6, 199, 85, 0.15);
+    }
+    
+    .nav-icon {
+      width: 24px;
+      height: 24px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    
+    .nav-badge {
+      margin-left: auto;
+      background: var(--line-green);
+      color: white;
+      font-size: 11px;
+      font-weight: 700;
+      padding: 2px 8px;
+      border-radius: 10px;
+    }
+    
+    /* Content */
+    .content {
+      flex: 1;
+      margin-left: 280px;
+      margin-right: 320px;
+      padding: 24px;
+      max-width: 680px;
+    }
+    
+    /* Compose Box */
+    .compose-box {
+      background: var(--bg-card);
+      border-radius: var(--radius-lg);
+      padding: 20px;
+      margin-bottom: 24px;
+      box-shadow: var(--shadow-sm);
+      border: 1px solid var(--border-color);
+    }
+    
+    .compose-header {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 16px;
+    }
+    
+    .compose-textarea {
+      width: 100%;
+      min-height: 80px;
+      border: none;
+      background: var(--bg-secondary);
+      border-radius: var(--radius-md);
+      padding: 14px 16px;
+      font-family: inherit;
+      font-size: 15px;
+      color: var(--text-primary);
+      resize: none;
+      outline: none;
+      transition: all 0.2s ease;
+    }
+    
+    .compose-textarea:focus {
+      background: var(--bg-primary);
+      box-shadow: 0 0 0 2px var(--line-green);
+    }
+    
+    .compose-textarea::placeholder {
+      color: var(--text-tertiary);
+    }
+    
+    .compose-actions {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-top: 16px;
+    }
+    
+    .compose-tools {
+      display: flex;
+      gap: 8px;
+    }
+    
+    .tool-btn {
+      width: 36px;
+      height: 36px;
+      border-radius: 50%;
+      border: none;
+      background: transparent;
+      color: var(--text-secondary);
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: all 0.2s ease;
+    }
+    
+    .tool-btn:hover {
+      background: var(--line-green-light);
+      color: var(--line-green);
+    }
+    
+    .dark .tool-btn:hover {
+      background: rgba(6, 199, 85, 0.15);
+    }
+    
+    .post-btn {
+      background: var(--line-green);
+      color: white;
+      border: none;
+      padding: 10px 24px;
+      border-radius: var(--radius-xl);
+      font-family: inherit;
+      font-size: 14px;
+      font-weight: 700;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    
+    .post-btn:hover {
+      background: var(--line-green-dark);
+      transform: translateY(-1px);
+      box-shadow: 0 4px 12px rgba(6, 199, 85, 0.3);
+    }
+    
+    /* Timeline */
+    .timeline {
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+    }
+    
+    .note-card {
+      background: var(--bg-card);
+      border-radius: var(--radius-lg);
+      padding: 20px;
+      box-shadow: var(--shadow-sm);
+      border: 1px solid var(--border-color);
+      transition: all 0.2s ease;
+      animation: slideUp 0.4s ease;
+    }
+    
+    @keyframes slideUp {
+      from {
+        opacity: 0;
+        transform: translateY(20px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+    
+    .note-card:hover {
+      box-shadow: var(--shadow-md);
+      border-color: var(--line-green);
+    }
+    
+    .note-header {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 12px;
+    }
+    
+    .note-avatar {
+      width: 44px;
+      height: 44px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, #667eea, #764ba2);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: white;
+      font-weight: 700;
+      font-size: 16px;
+      flex-shrink: 0;
+    }
+    
+    .note-meta {
+      flex: 1;
+      min-width: 0;
+    }
+    
+    .note-author {
+      font-weight: 700;
+      color: var(--text-primary);
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+    
+    .verified-badge {
+      width: 16px;
+      height: 16px;
+      background: var(--line-green);
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: white;
+      font-size: 10px;
+    }
+    
+    .note-npub {
+      font-size: 13px;
+      color: var(--text-tertiary);
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+    
+    .note-time {
+      font-size: 13px;
+      color: var(--text-tertiary);
+      margin-left: auto;
+    }
+    
+    .note-content {
+      font-size: 15px;
+      line-height: 1.7;
+      color: var(--text-primary);
+      margin-bottom: 16px;
+      word-wrap: break-word;
+    }
+    
+    .note-content a {
+      color: var(--line-green);
+      text-decoration: none;
+    }
+    
+    .note-content a:hover {
+      text-decoration: underline;
+    }
+    
+    .note-media {
+      margin-bottom: 16px;
+      border-radius: var(--radius-md);
+      overflow: hidden;
+    }
+    
+    .note-media img {
+      width: 100%;
+      display: block;
+    }
+    
+    .note-actions {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding-top: 12px;
+      border-top: 1px solid var(--border-color);
+    }
+    
+    .action-btn {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      padding: 8px 14px;
+      border-radius: var(--radius-xl);
+      border: none;
+      background: transparent;
+      color: var(--text-secondary);
+      font-family: inherit;
+      font-size: 13px;
+      font-weight: 500;
+      cursor: pointer;
+      transition: all 0.2s ease;
+    }
+    
+    .action-btn:hover {
+      background: var(--bg-secondary);
+    }
+    
+    .action-btn.liked {
+      color: #ef4444;
+    }
+    
+    .action-btn.liked svg {
+      fill: currentColor;
+    }
+    
+    .action-btn.reposted {
+      color: var(--line-green);
+    }
+    
+    .action-btn.zapped {
+      color: #f59e0b;
+    }
+    
+    /* Right Sidebar */
+    .right-sidebar {
+      width: 320px;
+      position: fixed;
+      right: 0;
+      top: 60px;
+      bottom: 0;
+      background: var(--bg-primary);
+      border-left: 1px solid var(--border-color);
+      padding: 20px;
+      overflow-y: auto;
+    }
+    
+    .sidebar-section {
+      margin-bottom: 24px;
+    }
+    
+    .sidebar-title {
+      font-weight: 700;
+      font-size: 16px;
+      margin-bottom: 16px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    
+    .search-box {
+      position: relative;
+      margin-bottom: 20px;
+    }
+    
+    .search-input {
+      width: 100%;
+      padding: 12px 16px 12px 44px;
+      border: 1px solid var(--border-color);
+      border-radius: var(--radius-xl);
+      background: var(--bg-secondary);
+      font-family: inherit;
+      font-size: 14px;
+      color: var(--text-primary);
+      outline: none;
+      transition: all 0.2s ease;
+    }
+    
+    .search-input:focus {
+      border-color: var(--line-green);
+      background: var(--bg-primary);
+      box-shadow: 0 0 0 3px rgba(6, 199, 85, 0.1);
+    }
+    
+    .search-icon {
+      position: absolute;
+      left: 14px;
+      top: 50%;
+      transform: translateY(-50%);
+      color: var(--text-tertiary);
+    }
+    
+    .trending-list {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+    
+    .trending-item {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 12px;
+      border-radius: var(--radius-md);
+      cursor: pointer;
+      transition: all 0.2s ease;
+    }
+    
+    .trending-item:hover {
+      background: var(--bg-secondary);
+    }
+    
+    .trending-rank {
+      font-size: 14px;
+      font-weight: 700;
+      color: var(--text-tertiary);
+      width: 24px;
+    }
+    
+    .trending-info {
+      flex: 1;
+    }
+    
+    .trending-tag {
+      font-weight: 600;
+      color: var(--text-primary);
+    }
+    
+    .trending-count {
+      font-size: 12px;
+      color: var(--text-tertiary);
+    }
+    
+    .follow-list {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+    
+    .follow-item {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 12px;
+      border-radius: var(--radius-md);
+      background: var(--bg-secondary);
+    }
+    
+    .follow-avatar {
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, #f093fb, #f5576c);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: white;
+      font-weight: 700;
+      font-size: 14px;
+    }
+    
+    .follow-info {
+      flex: 1;
+      min-width: 0;
+    }
+    
+    .follow-name {
+      font-weight: 600;
+      font-size: 14px;
+      color: var(--text-primary);
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+    
+    .follow-npub {
+      font-size: 12px;
+      color: var(--text-tertiary);
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+    
+    .follow-btn {
+      padding: 6px 14px;
+      border-radius: var(--radius-xl);
+      border: 1px solid var(--line-green);
+      background: transparent;
+      color: var(--line-green);
+      font-family: inherit;
+      font-size: 12px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s ease;
+    }
+    
+    .follow-btn:hover {
+      background: var(--line-green);
+      color: white;
+    }
+    
+    /* Theme Toggle */
+    .theme-toggle {
+      position: fixed;
+      bottom: 24px;
+      left: 24px;
+      width: 48px;
+      height: 48px;
+      border-radius: 50%;
+      background: var(--bg-card);
+      border: 1px solid var(--border-color);
+      box-shadow: var(--shadow-md);
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: var(--text-primary);
+      transition: all 0.2s ease;
+      z-index: 100;
+    }
+    
+    .theme-toggle:hover {
+      transform: scale(1.1);
+      box-shadow: var(--shadow-lg);
+    }
+    
+    /* Mobile Bottom Nav */
+    .mobile-nav {
+      display: none;
+      position: fixed;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      height: 64px;
+      background: var(--bg-primary);
+      border-top: 1px solid var(--border-color);
+      padding: 0 16px;
+      z-index: 100;
+    }
+    
+    .mobile-nav-items {
+      display: flex;
+      justify-content: space-around;
+      align-items: center;
+      height: 100%;
+    }
+    
+    .mobile-nav-item {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 4px;
+      color: var(--text-secondary);
+      text-decoration: none;
+      font-size: 10px;
+      font-weight: 500;
+    }
+    
+    .mobile-nav-item.active {
+      color: var(--line-green);
+    }
+    
+    .mobile-nav-item svg {
+      width: 24px;
+      height: 24px;
+    }
+    
+    /* Responsive */
+    @media (max-width: 1200px) {
+      .right-sidebar {
+        display: none;
+      }
+      .content {
+        margin-right: 0;
+        max-width: 100%;
+      }
+    }
+    
+    @media (max-width: 768px) {
+      .sidebar {
+        display: none;
+      }
+      .content {
+        margin-left: 0;
+        padding: 16px;
+        padding-bottom: 80px;
+      }
+      .mobile-nav {
+        display: block;
+      }
+      .header {
+        padding: 0 16px;
+      }
+    }
+    
+    /* Scrollbar */
+    ::-webkit-scrollbar {
+      width: 6px;
+    }
+    
+    ::-webkit-scrollbar-track {
+      background: transparent;
+    }
+    
+    ::-webkit-scrollbar-thumb {
+      background: var(--border-color);
+      border-radius: 3px;
+    }
+    
+    ::-webkit-scrollbar-thumb:hover {
+      background: var(--text-tertiary);
+    }
+    
+    /* Loading Animation */
+    .loading-pulse {
+      animation: pulse 1.5s infinite;
+    }
+    
+    @keyframes pulse {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.5; }
+    }
+  </style>
 </head>
 <body>
-    <div class="app-container">
-        <!-- ヘッダー -->
-        <header class="app-header">
-            <h1 id="header-title">ホーム</h1>
-            <div class="header-actions">
-                <button id="login-btn" class="header-btn">ログイン</button>
-                <button id="logout-btn" class="header-btn" style="display: none;">ログアウト</button>
-            </div>
-        </header>
-
-        <!-- メインコンテンツエリア -->
-        <main class="main-content">
-            <!-- ホームタブ -->
-            <div id="tab-home" class="tab-content active">
-                <div class="profile-section">
-                    <div class="profile-header">
-                        <img id="profile-avatar" src="/static/img/default-avatar.svg" alt="Avatar" class="profile-avatar">
-                        <div class="profile-info">
-                            <h2 id="profile-name">読み込み中...</h2>
-                            <p id="profile-npub" class="profile-npub"></p>
-                        </div>
-                        <button id="edit-profile-btn" class="icon-btn">編集</button>
-                    </div>
-                    <div class="profile-bio">
-                        <p id="profile-about"></p>
-                    </div>
-                </div>
-
-                <div class="posts-section">
-                    <h3>自分の投稿</h3>
-                    <div id="my-posts" class="posts-list"></div>
-                </div>
-            </div>
-
-            <!-- トークタブ (NIP-17 DM) -->
-            <div id="tab-talk" class="tab-content">
-                <div class="dm-list">
-                    <div class="empty-state">
-                        <p>DMはまだありません</p>
-                    </div>
-                </div>
-            </div>
-
-            <!-- タイムラインタブ -->
-            <div id="tab-timeline" class="tab-content">
-                <div class="post-form">
-                    <textarea id="post-input" placeholder="今何してる？（エアリプ専用）" maxlength="280"></textarea>
-                    <button id="post-btn" class="primary-btn">投稿</button>
-                </div>
-                
-                <div id="timeline" class="posts-list"></div>
-            </div>
-
-            <!-- おさいふタブ (NWC) -->
-            <div id="tab-wallet" class="tab-content">
-                <div class="wallet-section">
-                    <div class="wallet-balance">
-                        <h3>残高</h3>
-                        <p class="balance-amount">--- sats</p>
-                    </div>
-                    <div class="wallet-actions">
-                        <button class="wallet-btn">送金</button>
-                        <button class="wallet-btn">受取</button>
-                    </div>
-                    <div class="nwc-status">
-                        <p>NWC: <span id="nwc-status">未接続</span></p>
-                    </div>
-                </div>
-            </div>
-        </main>
-
-        <!-- 投稿詳細モーダル -->
-        <div id="post-modal" class="modal">
-            <div class="modal-content">
-                <span class="close">&times;</span>
-                <div id="modal-post-content"></div>
-            </div>
-        </div>
-
-        <!-- プロフィール編集モーダル -->
-        <div id="edit-profile-modal" class="modal">
-            <div class="modal-content">
-                <span class="close">&times;</span>
-                <h2>プロフィール編集</h2>
-                <form id="edit-profile-form">
-                    <label>名前</label>
-                    <input type="text" id="edit-name" placeholder="名前">
-                    
-                    <label>自己紹介</label>
-                    <textarea id="edit-about" placeholder="自己紹介"></textarea>
-                    
-                    <label>アイコンURL</label>
-                    <input type="text" id="edit-picture" placeholder="https://...">
-                    
-                    <button type="submit" class="primary-btn">保存</button>
-                </form>
-            </div>
-        </div>
-
-        <!-- 下部タブバー -->
-        <nav class="tab-bar">
-            <button class="tab-btn active" data-tab="home">
-                <svg class="tab-icon" viewBox="0 0 24 24" fill="currentColor">
-                    <path d="M10 20v-6h4v6h5v-8h3L12 3 2 12h3v8z"/>
-                </svg>
-                <span>ホーム</span>
-            </button>
-            
-            <button class="tab-btn" data-tab="talk">
-                <svg class="tab-icon" viewBox="0 0 24 24" fill="currentColor">
-                    <path d="M20 2H4c-1.1 0-2 .9-2 2v18l4-4h14c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2z"/>
-                </svg>
-                <span>トーク</span>
-            </button>
-            
-            <button class="tab-btn" data-tab="timeline">
-                <svg class="tab-icon" viewBox="0 0 24 24" fill="currentColor">
-                    <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/>
-                </svg>
-                <span>タイムライン</span>
-            </button>
-            
-            <button class="tab-btn" data-tab="wallet">
-                <svg class="tab-icon" viewBox="0 0 24 24" fill="currentColor">
-                    <path d="M21 18v1c0 1.1-.9 2-2 2H5c-1.11 0-2-.9-2-2V5c0-1.1.89-2 2-2h14c1.1 0 2 .9 2 2v1h-9c-1.11 0-2 .9-2 2v8c0 1.1.89 2 2 2h9zm-9-2h10V8H12v8zm4-2.5c-.83 0-1.5-.67-1.5-1.5s.67-1.5 1.5-1.5 1.5.67 1.5 1.5-.67 1.5-1.5 1.5z"/>
-                </svg>
-                <span>おさいふ</span>
-            </button>
-        </nav>
+  <!-- Header -->
+  <header class="header">
+    <div class="logo">
+      <div class="logo-icon">A</div>
+      algia
     </div>
+    <div class="header-actions">
+      <button class="icon-btn" title="通知">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/>
+          <path d="M13.73 21a2 2 0 0 1-3.46 0"/>
+        </svg>
+      </button>
+      <button class="icon-btn" title="設定">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <circle cx="12" cy="12" r="3"/>
+          <path d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42"/>
+        </svg>
+      </button>
+      <div class="avatar" title="プロフィール">M</div>
+    </div>
+  </header>
 
-    <script src="/static/js/app.js"></script>
+  <!-- Main Container -->
+  <div class="main-container">
+    <!-- Left Sidebar -->
+    <nav class="sidebar">
+      <div class="nav-section">
+        <div class="nav-title">メイン</div>
+        <a class="nav-item active" href="#">
+          <div class="nav-icon">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/>
+              <polyline points="9 22 9 12 15 12 15 22"/>
+            </svg>
+          </div>
+          ホーム
+        </a>
+        <a class="nav-item" href="#">
+          <div class="nav-icon">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <circle cx="11" cy="11" r="8"/>
+              <line x1="21" y1="21" x2="16.65" y2="16.65"/>
+            </svg>
+          </div>
+          検索
+        </a>
+        <a class="nav-item" href="#">
+          <div class="nav-icon">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/>
+              <polyline points="22,6 12,13 2,6"/>
+            </svg>
+          </div>
+          DM
+          <span class="nav-badge">3</span>
+        </a>
+        <a class="nav-item" href="#">
+          <div class="nav-icon">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/>
+            </svg>
+          </div>
+          Zap
+        </a>
+      </div>
+      
+      <div class="nav-section">
+        <div class="nav-title">コンテンツ</div>
+        <a class="nav-item" href="#">
+          <div class="nav-icon">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"/>
+            </svg>
+          </div>
+          ブックマーク
+        </a>
+        <a class="nav-item" href="#">
+          <div class="nav-icon">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <circle cx="12" cy="12" r="10"/>
+              <polygon points="10 8 16 12 10 16 10 8"/>
+            </svg>
+          </div>
+          ストリーム
+        </a>
+        <a class="nav-item" href="#">
+          <div class="nav-icon">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"/>
+            </svg>
+          </div>
+          グローバル
+        </a>
+      </div>
+      
+      <div class="nav-section">
+        <div class="nav-title">アカウント</div>
+        <a class="nav-item" href="#">
+          <div class="nav-icon">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/>
+              <circle cx="12" cy="7" r="4"/>
+            </svg>
+          </div>
+          プロフィール
+        </a>
+        <a class="nav-item" href="#">
+          <div class="nav-icon">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <circle cx="12" cy="12" r="3"/>
+              <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/>
+            </svg>
+          </div>
+          設定
+        </a>
+      </div>
+    </nav>
+
+    <!-- Content -->
+    <main class="content">
+      <!-- Compose Box -->
+      <div class="compose-box">
+        <div class="compose-header">
+          <div class="avatar">M</div>
+          <span style="color: var(--text-secondary); font-size: 14px;">いまどうしてる？</span>
+        </div>
+        <textarea class="compose-textarea" placeholder="Nostrに投稿する..."></textarea>
+        <div class="compose-actions">
+          <div class="compose-tools">
+            <button class="tool-btn" title="画像">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <rect x="3" y="3" width="18" height="18" rx="2" ry="2"/>
+                <circle cx="8.5" cy="8.5" r="1.5"/>
+                <polyline points="21 15 16 10 5 21"/>
+              </svg>
+            </button>
+            <button class="tool-btn" title="絵文字">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <circle cx="12" cy="12" r="10"/>
+                <path d="M8 14s1.5 2 4 2 4-2 4-2"/>
+                <line x1="9" y1="9" x2="9.01" y2="9"/>
+                <line x1="15" y1="9" x2="15.01" y2="9"/>
+              </svg>
+            </button>
+            <button class="tool-btn" title="場所">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/>
+                <circle cx="12" cy="10" r="3"/>
+              </svg>
+            </button>
+          </div>
+          <button class="post-btn">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <line x1="22" y1="2" x2="11" y2="13"/>
+              <polygon points="22 2 15 22 11 13 2 9 22 2"/>
+            </svg>
+            投稿する
+          </button>
+        </div>
+      </div>
+
+      <!-- Timeline -->
+      <div class="timeline">
+        <!-- Note 1 -->
+        <article class="note-card" style="animation-delay: 0.1s">
+          <div class="note-header">
+            <div class="note-avatar" style="background: linear-gradient(135deg, #06C755, #00a550);">J</div>
+            <div class="note-meta">
+              <div class="note-author">
+                jack
+                <span class="verified-badge">✓</span>
+              </div>
+              <div class="note-npub">npub1sg6...8htw</div>
+            </div>
+            <div class="note-time">5分前</div>
+          </div>
+          <div class="note-content">
+            Nostrは検閲耐性があり、分散型のソーシャルプロトコルです。あなたのデータはあなたのものです。🔐
+          </div>
+          <div class="note-actions">
+            <button class="action-btn">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"/>
+              </svg>
+              12
+            </button>
+            <button class="action-btn reposted">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <polyline points="17 1 21 5 17 9"/>
+                <path d="M3 11V9a4 4 0 0 1 4-4h14"/>
+                <polyline points="7 23 3 19 7 15"/>
+                <path d="M21 13v2a4 4 0 0 1-4 4H3"/>
+              </svg>
+              34
+            </button>
+            <button class="action-btn liked">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/>
+              </svg>
+              256
+            </button>
+            <button class="action-btn zapped">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/>
+              </svg>
+              1.2K
+            </button>
+          </div>
+        </article>
+
+        <!-- Note 2 -->
+        <article class="note-card" style="animation-delay: 0.2s">
+          <div class="note-header">
+            <div class="note-avatar" style="background: linear-gradient(135deg, #667eea, #764ba2);">F</div>
+            <div class="note-meta">
+              <div class="note-author">fiatjaf</div>
+              <div class="note-npub">npub1fjz...9k2w</div>
+            </div>
+            <div class="note-time">15分前</div>
+          </div>
+          <div class="note-content">
+            New NIP proposal for better relay discovery. Check it out: <a href="#">github.com/nostr-protocol/nips</a>
+            <br><br>
+            This will improve the user experience significantly! 🚀
+          </div>
+          <div class="note-actions">
+            <button class="action-btn">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"/>
+              </svg>
+              28
+            </button>
+            <button class="action-btn">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <polyline points="17 1 21 5 17 9"/>
+                <path d="M3 11V9a4 4 0 0 1 4-4h14"/>
+                <polyline points="7 23 3 19 7 15"/>
+                <path d="M21 13v2a4 4 0 0 1-4 4H3"/>
+              </svg>
+              56
+            </button>
+            <button class="action-btn">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/>
+              </svg>
+              189
+            </button>
+            <button class="action-btn">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/>
+              </svg>
+              890
+            </button>
+          </div>
+        </article>
+
+        <!-- Note 3 with Image -->
+        <article class="note-card" style="animation-delay: 0.3s">
+          <div class="note-header">
+            <div class="note-avatar" style="background: linear-gradient(135deg, #f093fb, #f5576c);">M</div>
+            <div class="note-meta">
+              <div class="note-author">
+                mattn
+                <span class="verified-badge">✓</span>
+              </div>
+              <div class="note-npub">npub1mat...3n7k</div>
+            </div>
+            <div class="note-time">1時間前</div>
+          </div>
+          <div class="note-content">
+            algia v0.0.91 をリリースしました！MCPサポートを追加 🎉
+            <br><br>
+            Go言語で書かれた高速なNostrクライアントです。
+          </div>
+          <div class="note-media">
+            <img src="https://opengraph.githubassets.com/1/mattn/algia" alt="algia GitHub" onerror="this.style.display='none'">
+          </div>
+          <div class="note-actions">
+            <button class="action-btn">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"/>
+              </svg>
+              42
+            </button>
+            <button class="action-btn">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <polyline points="17 1 21 5 17 9"/>
+                <path d="M3 11V9a4 4 0 0 1 4-4h14"/>
+                <polyline points="7 23 3 19 7 15"/>
+                <path d="M21 13v2a4 4 0 0 1-4 4H3"/>
+              </svg>
+              78
+            </button>
+            <button class="action-btn liked">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/>
+              </svg>
+              423
+            </button>
+            <button class="action-btn">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/>
+              </svg>
+              2.1K
+            </button>
+          </div>
+        </article>
+
+        <!-- Note 4 -->
+        <article class="note-card" style="animation-delay: 0.4s">
+          <div class="note-header">
+            <div class="note-avatar" style="background: linear-gradient(135deg, #4facfe, #00f2fe);">O</div>
+            <div class="note-meta">
+              <div class="note-author">odell</div>
+              <div class="note-npub">npub1ode...4w8q</div>
+            </div>
+            <div class="note-time">2時間前</div>
+          </div>
+          <div class="note-content">
+            Freedom tech is the only way forward. Bitcoin + Nostr = unstoppable 💪
+            <br><br>
+            #bitcoin #nostr #freedom
+          </div>
+          <div class="note-actions">
+            <button class="action-btn">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"/>
+              </svg>
+              89
+            </button>
+            <button class="action-btn reposted">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <polyline points="17 1 21 5 17 9"/>
+                <path d="M3 11V9a4 4 0 0 1 4-4h14"/>
+                <polyline points="7 23 3 19 7 15"/>
+                <path d="M21 13v2a4 4 0 0 1-4 4H3"/>
+              </svg>
+              234
+            </button>
+            <button class="action-btn liked">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/>
+              </svg>
+              1.5K
+            </button>
+            <button class="action-btn zapped">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/>
+              </svg>
+              8.9K
+            </button>
+          </div>
+        </article>
+      </div>
+    </main>
+
+    <!-- Right Sidebar -->
+    <aside class="right-sidebar">
+      <div class="search-box">
+        <svg class="search-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <circle cx="11" cy="11" r="8"/>
+          <line x1="21" y1="21" x2="16.65" y2="16.65"/>
+        </svg>
+        <input type="text" class="search-input" placeholder="Nostrを検索...">
+      </div>
+      
+      <div class="sidebar-section">
+        <div class="sidebar-title">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <polyline points="23 6 13.5 15.5 8.5 10.5 1 18"/>
+            <polyline points="17 6 23 6 23 12"/>
+          </svg>
+          トレンド
+        </div>
+        <div class="trending-list">
+          <div class="trending-item">
+            <span class="trending-rank">1</span>
+            <div class="trending-info">
+              <div class="trending-tag">#nostr</div>
+              <div class="trending-count">2.4K 投稿</div>
+            </div>
+          </div>
+          <div class="trending-item">
+            <span class="trending-rank">2</span>
+            <div class="trending-info">
+              <div class="trending-tag">#bitcoin</div>
+              <div class="trending-count">1.8K 投稿</div>
+            </div>
+          </div>
+          <div class="trending-item">
+            <span class="trending-rank">3</span>
+            <div class="trending-info">
+              <div class="trending-tag">#lightning</div>
+              <div class="trending-count">956 投稿</div>
+            </div>
+          </div>
+          <div class="trending-item">
+            <span class="trending-rank">4</span>
+            <div class="trending-info">
+              <div class="trending-tag">#zap</div>
+              <div class="trending-count">743 投稿</div>
+            </div>
+          </div>
+          <div class="trending-item">
+            <span class="trending-rank">5</span>
+            <div class="trending-info">
+              <div class="trending-tag">#algia</div>
+              <div class="trending-count">421 投稿</div>
+            </div>
+          </div>
+        </div>
+      </div>
+      
+      <div class="sidebar-section">
+        <div class="sidebar-title">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/>
+            <circle cx="9" cy="7" r="4"/>
+            <path d="M23 21v-2a4 4 0 0 0-3-3.87"/>
+            <path d="M16 3.13a4 4 0 0 1 0 7.75"/>
+          </svg>
+          おすすめユーザー
+        </div>
+        <div class="follow-list">
+          <div class="follow-item">
+            <div class="follow-avatar" style="background: linear-gradient(135deg, #f093fb, #f5576c);">S</div>
+            <div class="follow-info">
+              <div class="follow-name">Saylor</div>
+              <div class="follow-npub">npub1say...2k8w</div>
+            </div>
+            <button class="follow-btn">フォロー</button>
+          </div>
+          <div class="follow-item">
+            <div class="follow-avatar" style="background: linear-gradient(135deg, #4facfe, #00f2fe);">V</div>
+            <div class="follow-info">
+              <div class="follow-name">Vitalik</div>
+              <div class="follow-npub">npub1vit...9j3m</div>
+            </div>
+            <button class="follow-btn">フォロー</button>
+          </div>
+          <div class="follow-item">
+            <div class="follow-avatar" style="background: linear-gradient(135deg, #fa709a, #fee140);">W</div>
+            <div class="follow-info">
+              <div class="follow-name">Will</div>
+              <div class="follow-npub">npub1wil...4n7w</div>
+            </div>
+            <button class="follow-btn">フォロー</button>
+          </div>
+        </div>
+      </div>
+    </aside>
+  </div>
+
+  <!-- Mobile Navigation -->
+  <nav class="mobile-nav">
+    <div class="mobile-nav-items">
+      <a href="#" class="mobile-nav-item active">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/>
+          <polyline points="9 22 9 12 15 12 15 22"/>
+        </svg>
+        ホーム
+      </a>
+      <a href="#" class="mobile-nav-item">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <circle cx="11" cy="11" r="8"/>
+          <line x1="21" y1="21" x2="16.65" y2="16.65"/>
+        </svg>
+        検索
+      </a>
+      <a href="#" class="mobile-nav-item">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <line x1="12" y1="5" x2="12" y2="19"/>
+          <line x1="5" y1="12" x2="19" y2="12"/>
+        </svg>
+        投稿
+      </a>
+      <a href="#" class="mobile-nav-item">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/>
+          <polyline points="22,6 12,13 2,6"/>
+        </svg>
+        DM
+      </a>
+      <a href="#" class="mobile-nav-item">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/>
+          <circle cx="12" cy="7" r="4"/>
+        </svg>
+        プロフィール
+      </a>
+    </div>
+  </nav>
+
+  <!-- Theme Toggle -->
+  <button class="theme-toggle" onclick="toggleTheme()" title="テーマ切替">
+    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="sun-icon">
+      <circle cx="12" cy="12" r="5"/>
+      <line x1="12" y1="1" x2="12" y2="3"/>
+      <line x1="12" y1="21" x2="12" y2="23"/>
+      <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/>
+      <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/>
+      <line x1="1" y1="12" x2="3" y2="12"/>
+      <line x1="21" y1="12" x2="23" y2="12"/>
+      <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/>
+      <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/>
+    </svg>
+  </button>
+
+  <script>
+    function toggleTheme() {
+      document.body.classList.toggle('dark');
+      const icon = document.querySelector('.theme-toggle svg');
+      if (document.body.classList.contains('dark')) {
+        icon.innerHTML = `
+          <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/>
+        `;
+      } else {
+        icon.innerHTML = `
+          <circle cx="12" cy="12" r="5"/>
+          <line x1="12" y1="1" x2="12" y2="3"/>
+          <line x1="12" y1="21" x2="12" y2="23"/>
+          <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/>
+          <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/>
+          <line x1="1" y1="12" x2="3" y2="12"/>
+          <line x1="21" y1="12" x2="23" y2="12"/>
+          <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/>
+          <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/>
+        `;
+      }
+    }
+
+    // Check system preference
+    if (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) {
+      document.body.classList.add('dark');
+    }
+
+    // Add smooth scroll behavior
+    document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+      anchor.addEventListener('click', function (e) {
+        e.preventDefault();
+      });
+    });
+
+    // Like button interaction
+    document.querySelectorAll('.action-btn').forEach(btn => {
+      btn.addEventListener('click', function() {
+        if (this.querySelector('svg path[d*="20.84"]')) {
+          this.classList.toggle('liked');
+        }
+        if (this.querySelector('svg polyline[points*="17 1"]')) {
+          this.classList.toggle('reposted');
+        }
+        if (this.querySelector('svg polygon[points*="13 2"]')) {
+          this.classList.toggle('zapped');
+        }
+      });
+    });
+  </script>
 </body>
 </html>
